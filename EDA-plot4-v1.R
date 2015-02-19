@@ -31,7 +31,9 @@ explore_q4_plot<-function(){
   NEI_short<-filter(NEI,NEI$SCC==coal_vec$SCC)
   p <- ggplot(NEI_short, aes(year, Emissions)) + 
   geom_point() + 
-  geom_smooth(method="lm") +
+  ## eliminating outliers
+  ylim(0,60)  +
+  geom_smooth() +
   labs(title="Coal combustion related sources between 1999 and 2008")
     
   print(p + facet_grid(type ~ .))
