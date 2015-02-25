@@ -1,0 +1,36 @@
+## read in data from files
+NEI <- readRDS("summarySCC_PM25.rds")
+SCC <- readRDS("Source_Classification_Code.rds")
+
+## split the NEI data by year
+s <- split(NEI, NEI$year)
+
+## gather sums of emissions
+US_Emissions <- NULL
+for (i in 1:4) {
+    US_Emissions <- c(US_Emissions, sum(s[[i]][4]))
+}
+
+Year <- c(1999, 2002, 2005, 2008)
+
+## open file
+png("plot1.png")
+
+## plot data
+plot(Year, Total_PM2.5_Emissions,
+     main = "Total PM2.5 Emissions in U.S.",
+     xlab = "Year",
+     ylab = "Emissions (tons)",
+     ylim = c(0,8e+06),
+     pch = 19, col = "blue",
+     xaxt = "n", yaxt = "n"
+)
+axis(1, at=Year)
+axis(2, at=c(0, 4e+06, 8e+06), label=c(0, "4 million", "8 million"))
+
+## create and plot linear model
+model <- lm(Total_PM2.5_Emissions ~ Year)
+abline(model, col="blue", lwd=2)
+
+## close file
+dev.off()

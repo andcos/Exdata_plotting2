@@ -1,0 +1,47 @@
+# Deleting all vars, set necessary working directory
+# setwd("~/coursera/Exploratory Data Analysis/Course Project 2")
+rm(list=ls())
+or <- par()
+
+#Downloadiing and unziping files
+if(!file.exists("exdata-data-NEI_data.zip")){
+  #downloading files
+  u <- "https://d396qusza40orc.cloudfront.net/exdata%2Fdata%2FNEI_data.zip"
+  download.file(url = u, destfile = "exdata-data-NEI_data.zip", method = "curl")
+  #unzipping downloaded file
+  unzip("exdata-data-NEI_data.zip")  
+}
+
+# Looking at files in WD
+dir()
+# Loding files into R
+NEI <- readRDS("summarySCC_PM25.rds")
+SCC <- readRDS("Source_Classification_Code.rds")
+
+# We can look< that there is 1 type of pollution
+table(NEI$Pollutant)
+# Look at data
+head(NEI)
+
+# Searching for pollution from coal combustion-related sources
+# Looking for SCC codes that corresponds to necessary source of pollution
+# and save it to "nam"
+
+qq <- grep(pattern = "coal", x = SCC$Short.Name, ignore.case = T)
+nam <- SCC$Short.Name[qq]
+
+# Getting data about pollution with SCC codes
+# Agreggating files to coal_agr
+coal <- NEI[NEI$SCC %in% SCC$SCC[qq],c("year", "Emissions")]
+coal_agr  <- dcast(data = melt(coal, id.vars = c("year")), 
+                   formula = year ~ variable, fun.aggregate = sum)
+# Plotting plot4
+plot(coal_agr$year, coal_agr$Emissions/1000, type="b", lwd=2, ylab="", xlab="", 
+     cex=1, xaxt="n", yaxt="n")
+title(main = "The total PM2.5 emission from coal combustion-related sources", 
+      ylab = "Amount of PM2.5, in 1000 tons",
+      xlab = "year")
+axis(1,at = 1999:2008)
+axis(2,las = 2)
+dev.copy(png, "./plot4.png", width = 1000, height = 600)
+dev.off()

@@ -1,0 +1,20 @@
+# loading data
+if file.exists("summarySCC_PM25.rds") & file.exists("Source_Classification_Code.rds") {
+  NEI <- readRDS("summarySCC_PM25.rds")
+  SCC <- readRDS("Source_Classification_Code.rds")
+}
+else {
+  stop ("Data files not available in working directory")
+}
+# getting data by matching the word coal
+z <- filter(SCC, Short.Name = grepl("[Cc][Oo][Aa][Ll]", SCC$Short.Name))
+# merging data
+z <- merge(NEI, z, by.x = "SCC", by.y = "SCC")
+# sumamrizing data for plotting
+z <- summarize(group_by(z, year), sum(Emissions))
+# assigning column names for ease of reference
+colnames(z) <- c("year","emis")
+# plotting the graph and exporting to png format
+png(filename="plot4.png", width=640, height=480, units="px")
+qplot(year, emis, data=z, xlab="Year", ylab= "Emissions", main="Total - US Emissions from Coal", label=round(emis))+geom_line(color="green")+geom_text(size=3, color="blue", vjust=1)
+dev.off()
